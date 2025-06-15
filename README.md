@@ -1,359 +1,125 @@
-# README.md (Русский)
+I'll help create improved versions in both Russian and English. I'll organize them with better formatting and clarity.
 
-# Task_API
+# Task API (English)
 
-Это руководство описывает процесс запуска и использования Task_API, простого API для управления задачами. Он позволяет добавлять, просматривать, удалять задачи и отслеживать их статус.
+## Getting Started
 
-## 🚀 Запуск API
+### Windows 11
+1. Download the project from Github
+2. In the console, navigate to the project root and run: `./cmd/app/app.exe`
 
-### Предварительные требования
-*   **Git**: Для клонирования репозитория.
-*   **Go**: Компилятор Go (версия 1.18 или выше) для запуска проекта из исходного кода.
+### Any Operating System
+1. Install Go compiler
+2. Download the project from Github
+3. In the console, navigate to the project root and run: `go run cmd/app/main.go`
 
-### Шаги по запуску
-1.  **Клонируйте репозиторий:**
-    ```bash
-    git clone https://github.com/ваш_пользователь/ваш_репозиторий.git # Замените на актуальный URL
-    ```
-2.  **Перейдите в корневую директорию проекта:**
-    ```bash
-    cd ваш_репозиторий # Замените на имя папки проекта
-    ```
+## Configuration
+The server port can be changed in `config.yaml` by modifying `localhost:8080` to your desired port (e.g., `localhost:8081`)
 
-### Способы запуска
-#### Для Windows (использование исполняемого файла)
-Если у вас есть скомпилированный исполняемый файл `app.exe`:
-```bash
-.\cmd\app\app.exe
-```
+## API Endpoints
 
-#### Для любой ОС (с помощью Go компилятора)
-Убедитесь, что у вас установлен Go:
-```bash
-go run cmd/app/main.go
-```
+Postman is recommended for sending POST and GET requests.
 
-## ⚙️ Конфигурация (config.yaml)
+### Available Endpoints
 
-Файл `config.yaml` находится в корневой директории проекта. Вы можете изменить порт, на котором будет работать сервер, отредактировав значение `localhost:8080` (например, на `localhost:8081`).
+1. **Health Check**
+   - GET `http://127.0.0.1:8080`
+   - Response: `{"status": "connect"}` if server is running
 
-Пример `config.yaml`:
-```yaml
-server_address: "localhost:8080" # Измените на желаемый адрес/порт
-```
+2. **Add Task**
+   - POST `http://127.0.0.1:8080/tasks/add`
+   - Body: `{"name": "task_name"}`
+   - Responses:
+     - Success: `{"status": "add task"}`
+     - Duplicate: `{"status": "task already exists"}`
 
-При изменении порта, сервер будет слушать соединения на новом порте (например, `localhost:8081` вместо `localhost:8080`).
+3. **Get Task Details**
+   - GET `http://127.0.0.1:8080/tasks/{task_name}`
+   - Responses:
+     - Not Found: `{"status": "task not found"}`
+     - Success Example:
+     ```json
+     {
+         "name": "to eat",
+         "status": "completed",  // completed | in progress
+         "lead_time_min": 5,     // 3-5 minutes
+         "end_time": "2025-06-14T15:28:50.1430089+03:00"
+     }
+     ```
 
-## 🤝 Взаимодействие с API
+4. **List All Tasks**
+   - GET `http://127.0.0.1:8080/tasks`
+   - Returns list of all active tasks
 
-Рекомендуется использовать такие инструменты, как [Postman](https://www.postman.com/downloads/), [Insomnia](https://insomnia.rest/download) или `curl` для взаимодействия с API.
+5. **Delete Task**
+   - POST `http://127.0.0.1:8080/tasks/delete`
+   - Body: `{"name": "task_name"}`
+   - Responses:
+     - Success: `{"status": "delete task"}`
+     - Not Found: `{"status": "task not found"}`
 
-**Базовый URL:** `http://127.0.0.1:8080` (или любой другой порт, указанный в `config.yaml`).
-
-### 1. Проверка статуса сервера
-
-*   **URL:** `/`
-*   **Метод:** `GET`
-*   **Пример запроса:**
-    ```
-    GET http://127.0.0.1:8080
-    ```
-*   **Ожидаемый ответ:**
-    ```json
-    {
-        "status": "connect"
-    }
-    ```
-
-### 2. Добавление новой задачи
-
-*   **URL:** `/tasks/add`
-*   **Метод:** `POST`
-*   **Тело запроса (JSON):**
-    ```json
-    {
-        "name": "{название_задачи}"
-    }
-    ```
-*   **Пример запроса (Postman/curl):**
-    ```bash
-    curl -X POST -H "Content-Type: application/json" -d '{"name": "Купить молоко"}' http://127.0.0.1:8080/tasks/add
-    ```
-*   **Ожидаемые ответы:**
-    *   Если задача успешно добавлена:
-        ```json
-        {
-            "status": "add task"
-        }
-        ```
-    *   Если задача с таким именем уже существует:
-        ```json
-        {
-            "status": "task already exists"
-        }
-        ```
-
-### 3. Получение информации о задаче
-
-*   **URL:** `/tasks/{название_задачи}`
-*   **Метод:** `GET`
-*   **Пример запроса:**
-    ```
-    GET http://127.0.0.1:8080/tasks/Купить%20молоко
-    ```
-*   **Ожидаемые ответы:**
-    *   Если задача не найдена:
-        ```json
-        {
-            "status": "task not found"
-        }
-        ```
-    *   Если задача найдена:
-        ```json
-        {
-            "name": "Купить молоко",          # Название задачи
-            "status": "in progress",          # Статус задачи: "completed" (выполнена) | "in progress" (в процессе выполнения)
-            "lead_time_min": 5,               # Примерное время выполнения задачи (от 3 до 5 минут)
-            "end_time": "2025-06-14T15:28:50.1430089+03:00" # Время начала обработки задачи
-        }
-        ```
-
-### 4. Получение списка всех задач
-
-*   **URL:** `/tasks`
-*   **Метод:** `GET`
-*   **Пример запроса:**
-    ```
-    GET http://127.0.0.1:8080/tasks
-    ```
-*   **Ожидаемый ответ:**
-    Список всех добавленных и не удаленных задач. Формат ответа будет массивом JSON-объектов, аналогичных тем, что возвращаются при получении информации о конкретной задаче.
-    ```json
-    [
-        {
-            "name": "Купить молоко",
-            "status": "in progress",
-            "lead_time_min": 5,
-            "end_time": "2025-06-14T15:28:50.1430089+03:00"
-        },
-        {
-            "name": "Погулять с собакой",
-            "status": "completed",
-            "lead_time_min": 3,
-            "end_time": "2025-06-14T15:20:00.0000000+03:00"
-        }
-    ]
-    ```
-
-### 5. Удаление задачи
-
-*   **URL:** `/tasks/delete`
-*   **Метод:** `POST`
-*   **Тело запроса (JSON):**
-    ```json
-    {
-        "name": "{название_задачи}"
-    }
-    ```
-*   **Пример запроса (Postman/curl):**
-    ```bash
-    curl -X POST -H "Content-Type: application/json" -d '{"name": "Купить молоко"}' http://127.0.0.1:8080/tasks/delete
-    ```
-*   **Ожидаемые ответы:**
-    *   Если задача успешно удалена:
-        ```json
-        {
-            "status": "delete task"
-        }
-        ```
-    *   Если задача не найдена:
-        ```json
-        {
-            "status": "task not found"
-        }
-        ```
-
-## 🛑 Завершение работы
-
-Для остановки работающего сервера API просто нажмите `Ctrl + C` в консоли, где был запущен сервер.
+## Shutdown
+Press `Ctrl + C` in the console running the server
 
 ---
 
-# README.md (English)
+# Task API (Русский)
 
-# Task_API
+## Запуск
 
-This guide describes the process of running and using the Task_API, a simple API for managing tasks. It allows you to add, view, delete tasks, and track their status.
+### Windows 11
+1. Скачайте проект с Github
+2. В консоли в корне проекта выполните: `./cmd/app/app.exe`
 
-## 🚀 Running the API
+### Любая операционная система
+1. Установите компилятор Go
+2. Скачайте проект с Github
+3. В консоли в корне проекта выполните: `go run cmd/app/main.go`
 
-### Prerequisites
-*   **Git**: For cloning the repository.
-*   **Go**: Go compiler (version 1.18 or higher) for running the project from source.
+## Конфигурация
+Порт сервера можно изменить в файле `config.yaml`, заменив `localhost:8080` на нужный порт (например, `localhost:8081`)
 
-### Launch Steps
-1.  **Clone the Repository:**
-    ```bash
-    git clone https://github.com/your_user/your_repository.git # Replace with the actual URL
-    ```
-2.  **Navigate to the Project Root Directory:**
-    ```bash
-    cd your_repository # Replace with your project folder name
-    ```
+## API Endpoints
 
-### Ways to Run
-#### For Windows (Using the Executable)
-If you have a pre-compiled `app.exe` executable:
-```bash
-.\cmd\app\app.exe
-```
+Рекомендуется использовать Postman для отправки POST и GET запросов.
 
-#### For Any OS (Using Go Compiler)
-Ensure you have Go installed:
-```bash
-go run cmd/app/main.go
-```
+### Доступные эндпоинты
 
-## ⚙️ Configuration (config.yaml)
+1. **Проверка работоспособности**
+   - GET `http://127.0.0.1:8080`
+   - Ответ: `{"status": "connect"}` если сервер запущен
 
-The `config.yaml` file is located in the project's root directory. You can change the port on which the server will run by editing the `localhost:8080` value (e.g., to `localhost:8081`).
+2. **Добавление задачи**
+   - POST `http://127.0.0.1:8080/tasks/add`
+   - Тело запроса: `{"name": "название_задачи"}`
+   - Ответы:
+     - Успех: `{"status": "add task"}`
+     - Дубликат: `{"status": "task already exists"}`
 
-Example `config.yaml`:
-```yaml
-server_address: "localhost:8080" # Change to your desired address/port
-```
+3. **Получение информации о задаче**
+   - GET `http://127.0.0.1:8080/tasks/{название_задачи}`
+   - Ответы:
+     - Не найдено: `{"status": "task not found"}`
+     - Пример успешного ответа:
+     ```json
+     {
+         "name": "to eat",
+         "status": "completed",  // completed - выполнена | in progress - в процессе
+         "lead_time_min": 5,     // от 3 до 5 минут
+         "end_time": "2025-06-14T15:28:50.1430089+03:00"
+     }
+     ```
 
-By changing the port, the server will listen for connections on the new port (e.g., `localhost:8081` instead of `localhost:8080`).
+4. **Список всех задач**
+   - GET `http://127.0.0.1:8080/tasks`
+   - Возвращает список всех активных задач
 
-## 🤝 API Usage
+5. **Удаление задачи**
+   - POST `http://127.0.0.1:8080/tasks/delete`
+   - Тело запроса: `{"name": "название_задачи"}`
+   - Ответы:
+     - Успех: `{"status": "delete task"}`
+     - Не найдено: `{"status": "task not found"}`
 
-It is recommended to use tools like [Postman](https://www.postman.com/downloads/), [Insomnia](https://insomnia.rest/download), or `curl` for interacting with the API.
-
-**Base URL:** `http://127.0.0.1:8080` (or any other port specified in `config.yaml`).
-
-### 1. Server Status Check
-
-*   **URL:** `/`
-*   **Method:** `GET`
-*   **Example Request:**
-    ```
-    GET http://127.0.0.1:8080
-    ```
-*   **Expected Response:**
-    ```json
-    {
-        "status": "connect"
-    }
-    ```
-
-### 2. Add New Task
-
-*   **URL:** `/tasks/add`
-*   **Method:** `POST`
-*   **Request Body (JSON):**
-    ```json
-    {
-        "name": "{task_name}"
-    }
-    ```
-*   **Example Request (Postman/curl):**
-    ```bash
-    curl -X POST -H "Content-Type: application/json" -d '{"name": "Buy milk"}' http://127.0.0.1:8080/tasks/add
-    ```
-*   **Expected Responses:**
-    *   If the task is added successfully:
-        ```json
-        {
-            "status": "add task"
-        }
-        ```
-    *   If a task with the same name already exists:
-        ```json
-        {
-            "status": "task already exists"
-        }
-        ```
-
-### 3. Get Task Information
-
-*   **URL:** `/tasks/{task_name}`
-*   **Method:** `GET`
-*   **Example Request:**
-    ```
-    GET http://127.0.0.1:8080/tasks/Buy%20milk
-    ```
-*   **Expected Responses:**
-    *   If the task is not found:
-        ```json
-        {
-            "status": "task not found"
-        }
-        ```
-    *   If the task is found:
-        ```json
-        {
-            "name": "Buy milk",              // Task name
-            "status": "in progress",         // Task status: "completed" | "in progress"
-            "lead_time_min": 5,              // Estimated task completion time (3 to 5 minutes)
-            "end_time": "2025-06-14T15:28:50.1430089+03:00" // Task processing start time
-        }
-        ```
-
-### 4. Get All Tasks
-
-*   **URL:** `/tasks`
-*   **Method:** `GET`
-*   **Example Request:**
-    ```
-    GET http://127.0.0.1:8080/tasks
-    ```
-*   **Expected Response:**
-    A list of all added and non-deleted tasks. The response format will be an array of JSON objects, similar to those returned when getting information for a specific task.
-    ```json
-    [
-        {
-            "name": "Buy milk",
-            "status": "in progress",
-            "lead_time_min": 5,
-            "end_time": "2025-06-14T15:28:50.1430089+03:00"
-        },
-        {
-            "name": "Walk the dog",
-            "status": "completed",
-            "lead_time_min": 3,
-            "end_time": "2025-06-14T15:20:00.0000000+03:00"
-        }
-    ]
-    ```
-
-### 5. Delete Task
-
-*   **URL:** `/tasks/delete`
-*   **Method:** `POST`
-*   **Request Body (JSON):**
-    ```json
-    {
-        "name": "{task_name}"
-    }
-    ```
-*   **Example Request (Postman/curl):**
-    ```bash
-    curl -X POST -H "Content-Type: application/json" -d '{"name": "Buy milk"}' http://127.0.0.1:8080/tasks/delete
-    ```
-*   **Expected Responses:**
-    *   If the task is deleted successfully:
-        ```json
-        {
-            "status": "delete task"
-        }
-        ```
-    *   If the task is not found:
-        ```json
-        {
-            "status": "task not found"
-        }
-        ```
-
-## 🛑 Stopping the API
-
-To stop the running API server, simply press `Ctrl + C` in the console where the server was launched.
+## Завершение работы
+Нажмите `Ctrl + C` в консоли, где запущен сервер
